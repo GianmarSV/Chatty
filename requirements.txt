@@ -1,0 +1,13 @@
+Django>=5.0,<6.0
+channels
+channels-redis
+daphne
+psycopg2-binary
+djangorestframework
+djangorestframework-simplejwt
+django_redis
+faker
+drf-spectacular
+pytest
+pytest-django
+coverage

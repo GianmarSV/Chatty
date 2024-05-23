@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat WebSocket</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chatstyles.css' %}">
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const groupName = "{{ group_name }}";
+    var username = "";
+    const token = localStorage.getItem('accessToken');
+    var ticketUUID = '';
+
+
+    // Initial set up
+    $('#group-name').text(groupName);
+
+    // API URL
+    const apiUrl = 'http://' + window.location.host;
+
+    // ACTION - SEND WS MESSAGE
+    $('#message-form').submit(function(event){
+        event.preventDefault();
+
+        const messageInput = $('#message-input');
+        var msgData = {
+            'message': messageInput.val(),
+            'uuid': ticketUUID
+        }
+        ws.send(JSON.stringify(msgData));
+        messageInput.val('');
+    });
+
+
+    // GLOBAL AJAX ERROR HANDLING
+    $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 401) {
+            window.location.href = '/signin';
+        }
+    });
+
+
+    // REGISTER THE CONNECTION USING JWT AND UUID
+    function fetchMessages(url) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token // Replace with your actual JWT token
+            },
+            data: {
+                group_name: groupName
+            },
+            contentType: 'application/json',
+            success: function(data) {
+                // Process messages
+                console.log(data);
+                data.results.forEach(function(message) {
+                    var msgClass = '';
+                    console.log(message.username);
+                    console.log(username);
+                    if (message.username == username) {
+                        msgClass = 'message current-user';
+                    }else{
+                        msgClass = 'message other-user';
+                    }
+                    var divMsg = `<div class="${msgClass}">
+                        <div class="email">${message.username}</div>
+                        <div class="message-text">${message.message}</div>
+                    </div>`;
+                    $('#chat-window').prepend(divMsg);
+                        
+                });
+
+                // Check if there's a next page
+                if (data.next) {
+                    fetchMessages(data.next);
+                }
+
+                $('#chat-window').animate({ scrollTop: 9999999999 }, "fast");
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching messages:', error);
+            }
+        });
+    };
+    
+
+    function ajaxRegisterUUID() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: `${apiUrl}/chat/register_uuid/`,
+                headers: {
+                    Authorization: 'Bearer ' + token
+                },
+                data: {
+                    group_name: groupName
+                },
+                type: 'GET',
+                contentType: 'application/json',
+                success: function(response) {
+                    resolve(response);
+                },
+                error: function(error) {
+                    reject(error);
+                }
+            });
+        });
+    };
+
+    async function fetchData() {
+        try {
+            const response = await ajaxRegisterUUID();
+            ticketUUID = response.ticket_uuid;
+            username = response.username;
+        } catch (error) {
+            console.error(error);
+        };
+
+        // GET OLD
+        fetchMessages(`${apiUrl}/chat/messages/`);
+
+        // WEBSOCKET LOGIC
+        const endpoint = 'ws://' + window.location.host + '/ws/chat/' + groupName + '?ticket_uuid=' + ticketUUID;
+        ws = new WebSocket(endpoint);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log(data);
+            // Append message
+            var msgClass = '';
+            if (data.username == username) {
+                msgClass = 'message current-user';
+            }else{
+                msgClass = 'message other-user';
+            }
+            var divMsg = `<div class="${msgClass}">
+                <div class="email">${data.username}</div>
+                <div class="message-text">${data.message}</div>
+            </div>`;
+            $('#chat-window').append(divMsg);
+
+        };
+
+        ws.onopen = function(event) {
+            console.log('WebSocket is open now.');
+        };
+
+
+        ws.onclose = function(event) {
+            console.log('WebSocket is closed now.');
+        };
+
+        ws.onerror = function(error) {
+            console.log('WebSocket Error:', error);
+        };
+    };
+
+    var ws = null;
+
+    fetchData();
+});
+</script>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2 id="group-name"></h2>
+        </div>
+        <div class="divider"></div>
+        <div class="chat-window" id="chat-window">
+            
+        </div>
+        <form id="message-form" class="message-form">
+            <input type="text" id="message-input" class="message-input" placeholder="" required>
+            <button class="send-button">Send</button>
+        </form>
+    </div>
+</body>
+</html>

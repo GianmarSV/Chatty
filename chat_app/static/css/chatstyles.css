@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "slnt" 0;
+    background-color: #e3f1ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.namechat {
+    margin-bottom: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.chat-header h2 {
+    margin: 0;
+    color: #383737;
+    font-weight: bolder;
+    font-size: 20px;
+;
+}
+
+.divider {
+    height: 1px;
+    background-color: #dddddd;
+}
+
+.chat-window {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px); /* Adjust the 200px as needed for header, footer, etc. */
+}
+
+.message {
+    margin-bottom: 20px;
+    max-width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message .email {
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.message.current-user {
+    align-self: flex-end;
+    background-color: #ddedff;
+    color: #383737;
+    text-align: right;
+    align-items:flex-end;
+    font-size: 16px;
+}
+
+.message.other-user {
+    align-self: flex-start;
+    background-color: #f2f3f2;
+    color: #383737;
+    font-size: 16px;
+}
+
+.message-form {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    background-color: #ffffff;
+}
+
+.message-input {
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    margin-right: 0px;
+}
+
+.send-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background-color: #0056b3;
+}
